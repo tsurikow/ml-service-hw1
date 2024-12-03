@@ -4,6 +4,7 @@ Simple FastAPI service for car price prediction model
 
 Student: Tsurikov Vitaly
 
+All results and conclusions here: [RESULTS.md](RESULTS.md)
 
 ## Examples of requests
 
