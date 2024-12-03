@@ -85,15 +85,17 @@ def predict_items(items: UploadFile = File(...)) -> StreamingResponse:
     try:
         df = pd.read_csv(items.file)
     except Exception:
-        raise HTTPException(status_code=500, detail='Something went wrong')
+        raise HTTPException(status_code=500, detail='Something went wrong. Only .csv is allowed.')
     finally:
         items.file.close()
 
     # Items validation for every object in df
+    validation = 'Validated successfully. No errors in data'
     try:
         Items(objects=df.to_dict(orient="records"))
     except ValidationError as exc:
-        print(repr(exc.errors()[0]['type']))
+        validation = exc.json()
+        #print(repr(exc.errors()[0]['type'])) # default exception output
 
     # cleaning data and predicting price
     df_output = df.copy() # need it to return unprocessed data
@@ -108,6 +110,7 @@ def predict_items(items: UploadFile = File(...)) -> StreamingResponse:
                                  media_type="text/csv"
                                  )
     response.headers["Content-Disposition"] = "attachment; filename=result.csv"
+    response.headers["Validation-results"] = validation # validation errors as JSON in header
 
     return response
 
